@@ -1,1 +1,4 @@
 *.pdf
+*.keras
+*.pkl
+*.h5
