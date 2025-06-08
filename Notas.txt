@@ -1,0 +1,185 @@
+Divulgación
+
+1.- Tesina: Metodología
+
+
+skopt
+
+optimización de frente de pareto??
+
+Búsqueda Maya
+
+Bitácora de acciones
+Se hace un select inicial de las condiciones ambientales, excluyendo datos eliminados y reales = 0, ordenado por query de vigencia
+Se agrupan los datos para sacar el porcentaje de no nulos
+En base a los nulos, se excluyen la Presion Atmosférica, Descripción de dirección del viento
+Incluir comentarios de qué significan los números de iCodCondCielo, iCodDirViento
+Nos pasamos a excel para tener todos los valores en una pestaña, tanto el pronóstico como las condiciones ambientales
+Se realiza el EDA para cada variable usando los datos sin nulos principal.
+Nos percatamos que la variable fltPrecipitacion está en ceros en más de un 90% por lo que la variable se va a descartar de los 3 archivos.
+
+Tengo que estandarizar la información para poderla clusterizar
+
+Pendientes:
+Estandarizar la información
+Investigar guardar un modelo entrenado
+
+
+
+Técnicas para rellenar huecos
+
+Mejores hiperparámetros para Cluster 2 (Nublado): {'filters': 64, 'lstm_units': 100, 'dropout_rate': 0.3, 'kernel_size': 3, 'learning_rate': 0.0005, 'epochs': 30, 'batch_size': 16}
+Mejores hiperparámetros para Cluster 0 (Lluvioso): {'filters': 128, 'lstm_units': 150, 'dropout_rate': 0.3, 'kernel_size': 3, 'learning_rate': 0.001, 'epochs': 100, 'batch_size': 64}
+Productos pagados de Colab - Cancela los contratos aquí
+Mejores hiperparámetros para Cluster 1 (Soleado): {'filters': 128, 'lstm_units': 150, 'dropout_rate': 0.3, 'kernel_size': 3, 'learning_rate': 0.001, 'epochs': 100, 'batch_size': 64}
+
+model = Sequential([
+                Conv1D(filters=individual["filters"], kernel_size=individual["kernel_size"], padding='same', input_shape=(X_train.shape[1], X_train.shape[2])),
+                BatchNormalization(),
+                Activation('relu'),
+                MaxPooling1D(pool_size=2),
+                Bidirectional(LSTM(individual["lstm_units"], return_sequences=False)),
+                Dense(50, activation='relu'),
+                Dropout(individual["dropout_rate"]),
+                Dense(1, activation='linear')
+            ])
+
+
+Indices de validez de grupos
+Balance accuracy
+sensibility
+especificidad
+
+REMINDER:
+
+If trainingMAPE is 30% for example and testMAPE is 30.5% then their difference is 0.5%.
+So since 0.5% is < 10% (benchmark for overfitting) we conclude that the model does not overfit.
+A reason for overfitting is that you are trying to fit a too complex model to a small dataset.
+
+Since testMAPE is 30%, do we accept the model for forecasts? The answer is it depends on the benchmark we have for testMAPE.
+
+Since testMAPE is e.g., 30.5% then we say that the model accuracy is expected to have an error of around 30% on the forecasts.
+We will never learn the forecast error since we will never learn the future (until it happens).
+So at the moment we can have a proxy of forecast error only.
+
+So we check 2 things:
+a) First the testMAPE on its own.
+b) The difference testMAPE minus trainMAPE must be ≤ 10% or there is overfitting.
+So if both are ok, then we can use the model for forecasts. But if either is bad, then we reject the model.
+
+If we had more data, then we would be doing hyperparameter tuning:
+
+a) Split data into training, validation, and test sets:
+
+Training set: 60% of the data
+Validation set: 20% of the data
+Test set: 20% of the data
+b) Fit the model to the training set with different polynomial degrees (e.g., 2, 3, 4), and calculate the error on the validation set.
+
+c) Find the hyperparameter combination that minimizes the validation error.
+
+We say that we “tune” the hyperparameters on the validation set.
+Select the best polynomial degree as the one with the smallest validation error.
+d) Fit the model to the combined training and validation sets using this best hyperparameter (polynomial degree), and calculate the error on the test set, i.e., the testMAPE for that hyperparameter combination.
+
+Tuning the hyperparameters is not mandatory. The fact that we didn't tune the hyperparameters doesn't make the model outputs meaningless.
+In our case, we selected the hyperparameters based on our own intuition, typical values, or previous research.
+
+Cambiar a modelos de aprendizaje el módulo 2
+Cambiar Evaluación -> Entrenamiento y Validación
+
+En la Figura 6. Cambiar a meses de uno por uno, agrupado año y luego meses
+
+Subir la descripción de las variables al inicio de la sección
+
+Agregar apéndice con los resultados, pero tiene que ser reescrito, no pegar el documento como tal
+
+Ya no incluir la parte de las pruebas estadísticas para comparar métricas (modificar diagrama)
+
+Añadir en la descripción de variables, intentar buscar una referencia
+
+Espacio para las listas se muestran doble
+
+Completo:
+LightGBM: Mejores hiperparámetros: {'num_leaves': 14, 'subsample': 0.3412949971354309, 'colsample_bytree': 0.34190269422505076, 'min_data_in_leaf': 85} Best is trial 47 with value: 0.003302467360722824.
+Random Forest: Mejores hiperparámetros: {'n_estimators': 400, 'max_depth': 50, 'min_samples_split': 4, 'min_samples_leaf': 10, 'bootstrap': True} Best is trial 13 with value: 0.003983264269355088.
+CTNET: Mejores hiperparámetros: {'head_size': 2, 'num_heads': 7, 'ff_dim': 80, 'num_transformer_blocks': 1, 'mlp_units_1': 192, 'mlp_units_2': 128, 'dropout': 0.4987492446198915, 'mlp_dropout': 0.2048079774950788, 'learning_rate': 0.004694195402090184, 'batch_size': 128} Best is trial 36 with value: 0.004438220988959074.
+Forecasting: Mejores hiperparámetros: {'filters': 128, 'kernel_size': 5, 'lstm_units_1': 64, 'lstm_units_2': 128, 'lstm_units_3': 64, 'dropout_lstm': 0.40086998693335835, 'dropout_dense': 0.41776351065139583, 'learning_rate': 0.0012316082606971734, 'batch_size': 128} Best is trial 41 with value: 0.004554731771349907.
+Photovoltaic: Mejores hiperparámetros: {'filters_1': 128, 'filters_2': 128, 'kernel_size': 3, 'gru_units': 64, 'num_heads': 2, 'dropout_rate': 0.36428579949557205, 'dense_units_1': 128, 'dense_units_2': 32, 'learning_rate': 0.00029394651991630923, 'batch_size': 128} Best is trial 35 with value: 0.00454827630892396.
+
+Soleado KMEans:
+LightGBM: Mejores hiperparámetros: {'n_estimators': 400, 'max_depth': 45, 'min_samples_split': 17, 'min_samples_leaf': 10, 'bootstrap': True} Best is trial 14 with value: 0.005909366140332638.
+Random Forest: Mejores hiperparámetros: {'n_estimators': 400, 'max_depth': 45, 'min_samples_split': 17, 'min_samples_leaf': 10, 'bootstrap': True}: Best is trial 14 with value: 0.005909366140332638
+CTNET: Mejores hiperparámetros: {'head_size': 5, 'num_heads': 5, 'ff_dim': 112, 'num_transformer_blocks': 2, 'mlp_units_1': 192, 'mlp_units_2': 128, 'dropout': 0.2933459854281062, 'mlp_dropout': 0.3522227742199008, 'learning_rate': 0.002180590014884393, 'batch_size': 512} Best is trial 35 with value: 0.02839106135070324.
+Forecasting: Mejores hiperparámetros: {'filters': 128, 'kernel_size': 2, 'lstm_units_1': 256, 'lstm_units_2': 32, 'lstm_units_3': 64, 'dropout_lstm': 0.4830474393637703, 'dropout_dense': 0.1839738348362421, 'learning_rate': 0.002043412520274025, 'batch_size': 128}  Best is trial 17 with value: 0.029701795428991318.
+Photovoltaic: Mejores hiperparámetros: {'filters_1': 64, 'filters_2': 128, 'kernel_size': 2, 'gru_units': 32, 'num_heads': 2, 'dropout_rate': 0.4970002430907097, 'dense_units_1': 128, 'dense_units_2': 16, 'learning_rate': 0.00039769893936746916, 'batch_size': 128} Best is trial 24 with value: 0.027873067185282707.
+
+Nublado KMeans: 
+LightGBM: Mejores hiperparámetros: {'num_leaves': 708, 'subsample': 0.3584326593589673, 'colsample_bytree': 0.4904780669222326, 'min_data_in_leaf': 27} Best is trial 12 with value: 0.009321112971070147. 
+Random Forest: Mejores hiperparámetros: {'n_estimators': 450, 'max_depth': 40, 'min_samples_split': 5, 'min_samples_leaf': 6, 'bootstrap': True} Best is trial 32 with value: 0.010767257960981309.
+CTNET: Mejores hiperparámetros: {'head_size': 4, 'num_heads': 5, 'ff_dim': 128, 'num_transformer_blocks': 3, 'mlp_units_1': 128, 'mlp_units_2': 64, 'dropout': 0.10435760102849667, 'mlp_dropout': 0.27390486046392415, 'learning_rate': 0.001055563359247843, 'batch_size': 256} Best is trial 40 with value: 0.05336686596274376.
+Forecasting: Mejores hiperparámetros: {'filters': 128, 'kernel_size': 4, 'lstm_units_1': 64, 'lstm_units_2': 64, 'lstm_units_3': 32, 'dropout_lstm': 0.12850289949645297, 'dropout_dense': 0.3736924023288869, 'learning_rate': 0.0005232498319662458, 'batch_size': 512} Best is trial 0 with value: 0.05402800440788269.
+Photovoltaic: Mejores hiperparámetros: {'filters_1': 128, 'filters_2': 128, 'kernel_size': 4, 'gru_units': 128, 'num_heads': 4, 'dropout_rate': 0.28918099674260234, 'dense_units_1': 128, 'dense_units_2': 32, 'learning_rate': 0.0020715275009286437, 'batch_size': 128} Best is trial 45 with value: 0.05312512069940567. 
+
+Soleado GMM: 
+LightGBM: Mejores hiperparámetros: {'num_leaves': 992, 'subsample': 0.5927393762942831, 'colsample_bytree': 0.8975135756695963, 'min_data_in_leaf': 74} Best is trial 17 with value: 0.004426787839221232.
+Random Forest: Mejores hiperparámetros: {'n_estimators': 350, 'max_depth': 20, 'min_samples_split': 5, 'min_samples_leaf': 10, 'bootstrap': True} Best is trial 14 with value: 0.004013962990746831.
+CTNET: Mejores hiperparámetros: {'head_size': 2, 'num_heads': 5, 'ff_dim': 48, 'num_transformer_blocks': 2, 'mlp_units_1': 448, 'mlp_units_2': 32, 'dropout': 0.3565691296343225, 'mlp_dropout': 0.43344984355636373, 'learning_rate': 0.001443152051243645, 'batch_size': 512} Best is trial 8 with value: 0.05111462622880936
+Forecasting: Mejores hiperparámetros: {'filters': 64, 'kernel_size': 2, 'lstm_units_1': 64, 'lstm_units_2': 32, 'lstm_units_3': 16, 'dropout_lstm': 0.43199403176870343, 'dropout_dense': 0.1588272373910951, 'learning_rate': 0.007973597957122082, 'batch_size': 128} Best is trial 46 with value: 0.05572878569364548.
+Photovoltaic: Mejores hiperparámetros: {'filters_1': 64, 'filters_2': 64, 'kernel_size': 2, 'gru_units': 32, 'num_heads': 2, 'dropout_rate': 0.32554532521832025, 'dense_units_1': 32, 'dense_units_2': 64, 'learning_rate': 0.002609513288004872, 'batch_size': 128} Best is trial 45 with value: 0.05489955097436905.
+
+Nublado GMM:
+LightGBM: Mejores hiperparámetros: {'num_leaves': 551, 'subsample': 0.6009137391470561, 'colsample_bytree': 0.8297340662569153, 'min_data_in_leaf': 100} Best is trial 23 with value: 0.01219272713521226.
+Random Forest: Mejores hiperparámetros: {'n_estimators': 250, 'max_depth': 15, 'min_samples_split': 4, 'min_samples_leaf': 10, 'bootstrap': True} Best is trial 24 with value: 0.020290209643167814.
+CTNET: Mejores hiperparámetros: {'head_size': 7, 'num_heads': 6, 'ff_dim': 112, 'num_transformer_blocks': 4, 'mlp_units_1': 256, 'mlp_units_2': 160, 'dropout': 0.20184163593744978, 'mlp_dropout': 0.16747221003829596, 'learning_rate': 0.0012189326492547325, 'batch_size': 256} Best is trial 22 with value: 0.063173808157444.
+Forecasting: Mejores hiperparámetros: {'filters': 128, 'kernel_size': 5, 'lstm_units_1': 64, 'lstm_units_2': 32, 'lstm_units_3': 32, 'dropout_lstm': 0.40041063539523436, 'dropout_dense': 0.1716619465424395, 'learning_rate': 0.001445396577181948, 'batch_size': 128} Best is trial 43 with value: 0.06919191032648087.
+Photovoltaic: Mejores hiperparámetros: {'filters_1': 64, 'filters_2': 128, 'kernel_size': 2, 'gru_units': 128, 'num_heads': 2, 'dropout_rate': 0.2976485622510353, 'dense_units_1': 64, 'dense_units_2': 64, 'learning_rate': 0.0009167604110354238, 'batch_size': 256} Best is trial 39 with value: 0.06859374046325684.
+
+Lluvioso GMM:
+LightGBM: Mejores hiperparámetros: {'num_leaves': 112, 'subsample': 0.38768735737758864, 'colsample_bytree': 0.6849851431944389, 'min_data_in_leaf': 94} Best is trial 27 with value: 0.00883967604525281
+Random Forest: Mejores hiperparámetros: {'n_estimators': 250, 'max_depth': 10, 'min_samples_split': 8, 'min_samples_leaf': 6, 'bootstrap': True} Best is trial 28 with value: 0.01006000188027187.
+CTNET: Mejores hiperparámetros: {'head_size': 7, 'num_heads': 2, 'ff_dim': 96, 'num_transformer_blocks': 4, 'mlp_units_1': 128, 'mlp_units_2': 224, 'dropout': 0.1267581143378228, 'mlp_dropout': 0.313337321637589, 'learning_rate': 0.0008212627019643434, 'batch_size': 256} Best is trial 47 with value: 0.042842429131269455.
+Forecasting: Mejores hiperparámetros: {'filters': 64, 'kernel_size': 4, 'lstm_units_1': 256, 'lstm_units_2': 32, 'lstm_units_3': 64, 'dropout_lstm': 0.25096267684751133, 'dropout_dense': 0.22780158875618112, 'learning_rate': 0.009446162950489861, 'batch_size': 256} Best is trial 1 with value: 0.044524192810058594.
+Photovoltaic: Mejores hiperparámetros: {'filters_1': 128, 'filters_2': 256, 'kernel_size': 2, 'gru_units': 32, 'num_heads': 8, 'dropout_rate': 0.3467902144595288, 'dense_units_1': 64, 'dense_units_2': 16, 'learning_rate': 0.002342745284309666, 'batch_size': 512} Best is trial 42 with value: 0.04142600670456886.
+
+Completo CTNET:
+LightGBM: Mejores hiperparámetros: {'num_leaves': 647, 'subsample': 0.463324555209959, 'colsample_bytree': 0.4933576329978808, 'min_data_in_leaf': 69} Best is trial 14 with value: 0.003363233152905849.
+Random Forest: Mejores hiperparámetros: {'n_estimators': 500, 'max_depth': 10, 'min_samples_split': 17, 'min_samples_leaf': 10, 'bootstrap': True} Best is trial 47 with value: 0.003996404033956992.
+CTNET: Mejores hiperparámetros: {'head_size': 8, 'num_heads': 6, 'ff_dim': 64, 'num_transformer_blocks': 1, 'mlp_units_1': 320, 'mlp_units_2': 224, 'dropout': 0.2185773791153159, 'mlp_dropout': 0.15181852511491634, 'learning_rate': 0.0023194796521910973, 'batch_size': 128} Best is trial 42 with value: 0.004135461058467627.
+Forecasting:Mejores hiperparámetros: {'filters': 32, 'kernel_size': 3, 'lstm_units_1': 256, 'lstm_units_2': 128, 'lstm_units_3': 64, 'dropout_lstm': 0.2198136912202202, 'dropout_dense': 0.1055940653984536, 'learning_rate': 0.005884684263161474, 'batch_size': 128} Best is trial 8 with value: 0.003967085853219032.
+Photovoltaic: Mejores hiperparámetros: {'filters_1': 32, 'filters_2': 256, 'kernel_size': 5, 'gru_units': 32, 'num_heads': 2, 'dropout_rate': 0.23894843113163136, 'dense_units_1': 64, 'dense_units_2': 32, 'learning_rate': 0.001130176861737509, 'batch_size': 512} Best is trial 9 with value: 0.0041771503165364265.
+
+CTNET Soleado KMeans:
+LightGBM: Mejores hiperparámetros: {'num_leaves': 723, 'subsample': 0.9503418016738101, 'colsample_bytree': 0.7008886175987086, 'min_data_in_leaf': 98} Best is trial 34 with value: 0.012677967648330317.
+Random Forest: Mejores hiperparámetros: {'n_estimators': 100, 'max_depth': 20, 'min_samples_split': 10, 'min_samples_leaf': 1, 'bootstrap': True} Best is trial 49 with value: 0.015490110474350734.
+CTNET: Mejores hiperparámetros: {'head_size': 6, 'num_heads': 6, 'ff_dim': 96, 'num_transformer_blocks': 2, 'mlp_units_1': 192, 'mlp_units_2': 32, 'dropout': 0.2488978570980842, 'mlp_dropout': 0.14412739337195055, 'learning_rate': 0.0013543389753120014, 'batch_size': 256} Best is trial 47 with value: 0.04269474372267723.
+Forecasting: Mejores hiperparámetros: {'filters': 128, 'kernel_size': 5, 'lstm_units_1': 64, 'lstm_units_2': 128, 'lstm_units_3': 64, 'dropout_lstm': 0.49395540130954024, 'dropout_dense': 0.28151626709138994, 'learning_rate': 0.0028071431327799773, 'batch_size': 128} Best is trial 36 with value: 0.042794276028871536.
+Photovoltaic: Mejores hiperparámetros: {'filters_1': 64, 'filters_2': 64, 'kernel_size': 3, 'gru_units': 64, 'num_heads': 4, 'dropout_rate': 0.318290448710626, 'dense_units_1': 64, 'dense_units_2': 32, 'learning_rate': 0.004031650678853645, 'batch_size': 128} Best is trial 29 with value: 0.04029068350791931.
+
+CTNET Nublado KMeans:
+LightGBM: Mejores hiperparámetros: {'num_leaves': 10, 'subsample': 0.6705774866860973, 'colsample_bytree': 0.9907112668862691, 'min_data_in_leaf': 37} Best is trial 21 with value: 0.0033351437437482254.
+Random Forest: Mejores hiperparámetros: {'n_estimators': 500, 'max_depth': 40, 'min_samples_split': 11, 'min_samples_leaf': 10, 'bootstrap': True} Best is trial 13 with value: 0.003668829637600202.
+CTNET: Mejores hiperparámetros: {'head_size': 6, 'num_heads': 2, 'ff_dim': 48, 'num_transformer_blocks': 5, 'mlp_units_1': 448, 'mlp_units_2': 256, 'dropout': 0.3360822470360483, 'mlp_dropout': 0.32432206414310666, 'learning_rate': 0.001237208136295941, 'batch_size': 128} Best is trial 40 with value: 0.01450075302273035.
+Forecasting: Mejores hiperparámetros: {'filters': 128, 'kernel_size': 3, 'lstm_units_1': 64, 'lstm_units_2': 64, 'lstm_units_3': 16, 'dropout_lstm': 0.1907120591332447, 'dropout_dense': 0.3841859555154085, 'learning_rate': 0.005337799002681695, 'batch_size': 128} Best is trial 41 with value: 0.012921338900923729.
+Photovoltaic: Mejores hiperparámetros: {'filters_1': 128, 'filters_2': 64, 'kernel_size': 2, 'gru_units': 32, 'num_heads': 2, 'dropout_rate': 0.2547668056441918, 'dense_units_1': 128, 'dense_units_2': 64, 'learning_rate': 0.0004315906506319696, 'batch_size': 512} Best is trial 18 with value: 0.012901460751891136.
+
+CTNET Soleado GMM:
+LightGBM: Mejores hiperparámetros: {'num_leaves': 12, 'subsample': 0.6072863135175981, 'colsample_bytree': 0.4098140654276937, 'min_data_in_leaf': 38} Best is trial 31 with value: 0.004264697021551258.
+Random Forest: Mejores hiperparámetros: {'n_estimators': 100, 'max_depth': 15, 'min_samples_split': 20, 'min_samples_leaf': 10, 'bootstrap': True} Best is trial 13 with value: 0.005978160876986945.
+CTNET: Mejores hiperparámetros: {'head_size': 2, 'num_heads': 3, 'ff_dim': 128, 'num_transformer_blocks': 5, 'mlp_units_1': 512, 'mlp_units_2': 128, 'dropout': 0.2472431288474223, 'mlp_dropout': 0.12827737593130425, 'learning_rate': 0.00018118580392084425, 'batch_size': 256} Best is trial 10 with value: 0.030541962012648582.
+Forecasting: Mejores hiperparámetros: {'filters': 32, 'kernel_size': 4, 'lstm_units_1': 128, 'lstm_units_2': 128, 'lstm_units_3': 64, 'dropout_lstm': 0.31313216228237056, 'dropout_dense': 0.33555840743894466, 'learning_rate': 0.009948373853523741, 'batch_size': 128} Best is trial 31 with value: 0.01748260110616684.
+Photovoltaic: Mejores hiperparámetros: {'filters_1': 128, 'filters_2': 128, 'kernel_size': 2, 'gru_units': 32, 'num_heads': 4, 'dropout_rate': 0.2411091331641294, 'dense_units_1': 64, 'dense_units_2': 64, 'learning_rate': 0.00224494896517205, 'batch_size': 128} Best is trial 28 with value: 0.013302194885909557
+
+CTNET Nublado GMM:
+LightGBM: Mejores hiperparámetros: {'num_leaves': 990, 'subsample': 0.4913932898599116, 'colsample_bytree': 0.6988987393109299, 'min_data_in_leaf': 71} Best is trial 33 with value: 0.0035648600275307203.
+Random Forest: Mejores hiperparámetros: {'n_estimators': 100, 'max_depth': 30, 'min_samples_split': 16, 'min_samples_leaf': 7, 'bootstrap': True} Best is trial 47 with value: 0.0034679098523089876.
+CTNET: Mejores hiperparámetros: {'head_size': 3, 'num_heads': 5, 'ff_dim': 128, 'num_transformer_blocks': 4, 'mlp_units_1': 64, 'mlp_units_2': 64, 'dropout': 0.24660642380724143, 'mlp_dropout': 0.14852584809648614, 'learning_rate': 0.0007986646130384079, 'batch_size': 256} Best is trial 28 with value: 0.016611218452453613.
+Forecasting: Mejores hiperparámetros: {'filters': 64, 'kernel_size': 2, 'lstm_units_1': 256, 'lstm_units_2': 64, 'lstm_units_3': 64, 'dropout_lstm': 0.31196916627553595, 'dropout_dense': 0.49436107395722206, 'learning_rate': 0.00881680867870464, 'batch_size': 128} Best is trial 0 with value: 0.01447975728660822
+Photovoltaic: Mejores hiperparámetros: {'filters_1': 128, 'filters_2': 128, 'kernel_size': 2, 'gru_units': 128, 'num_heads': 4, 'dropout_rate': 0.4207136145233795, 'dense_units_1': 64, 'dense_units_2': 64, 'learning_rate': 0.00014469265960224032, 'batch_size': 128} Best is trial 40 with value: 0.015087977051734924.
+
+CTNET Lluvioso KMeans:
+LightGBM: Mejores hiperparámetros: {'num_leaves': 696, 'subsample': 0.7690730595365608, 'colsample_bytree': 0.6395935308442409, 'min_data_in_leaf': 95} Best is trial 43 with value: 0.012674407931316807.
+Random Forest: Mejores hiperparámetros: {'n_estimators': 500, 'max_depth': 15, 'min_samples_split': 6, 'min_samples_leaf': 1, 'bootstrap': True} Best is trial 49 with value: 0.01553801254014041.
+CTNET: Mejores hiperparámetros: {'head_size': 5, 'num_heads': 8, 'ff_dim': 128, 'num_transformer_blocks': 4, 'mlp_units_1': 320, 'mlp_units_2': 32, 'dropout': 0.15388192050977845, 'mlp_dropout': 0.45081295525163784, 'learning_rate': 0.0007468797484689935, 'batch_size': 128} Best is trial 46 with value: 0.042957380414009094.
+Forecasting: Mejores hiperparámetros: {'filters': 128, 'kernel_size': 3, 'lstm_units_1': 256, 'lstm_units_2': 128, 'lstm_units_3': 32, 'dropout_lstm': 0.18434525139222352, 'dropout_dense': 0.25916564521047447, 'learning_rate': 0.004850992789382952, 'batch_size': 128} Best is trial 7 with value: 0.03798773139715195.
+Photovoltaic: Mejores hiperparámetros: {'filters_1': 128, 'filters_2': 256, 'kernel_size': 2, 'gru_units': 64, 'num_heads': 2, 'dropout_rate': 0.4226674454938969, 'dense_units_1': 64, 'dense_units_2': 32, 'learning_rate': 0.00713646125183064, 'batch_size': 128} Best is trial 44 with value: 0.04101428762078285.
